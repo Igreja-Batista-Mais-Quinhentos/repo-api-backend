@@ -3,7 +3,7 @@ load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import auth, membros
+from app.routes import auth, membros, financeiro
 
 app = FastAPI(
     title="API Igreja Batista +500",
@@ -21,6 +21,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(membros.router)
+app.include_router(financeiro.router)
 
 @app.get("/")
 def root():
