@@ -3,7 +3,7 @@ load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import auth, membros, financeiro, comunicacao, grupos
+from app.routes import auth, membros, financeiro, comunicacao, grupos, interessados
 from app.database import engine, Base
 import app.models
 
@@ -28,6 +28,7 @@ app.include_router(membros.router)
 app.include_router(financeiro.router)
 app.include_router(comunicacao.router)
 app.include_router(grupos.router)
+app.include_router(interessados.router)
 
 @app.get("/")
 def root():
