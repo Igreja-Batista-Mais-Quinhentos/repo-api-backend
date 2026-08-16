@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models.usuario import Usuario
+from app.models.usuario import Usuario, Papel
 from app.schemas.auth import RegisterInput, LoginInput, TokenResponse, UsuarioResponse
 from app.middlewares.auth import create_token, get_usuario_atual
 
@@ -16,7 +16,7 @@ def cadastrar(body: RegisterInput, db: Session = Depends(get_db)):
 
     senha_hash = bcrypt.hashpw(body.senha.encode(), bcrypt.gensalt()).decode()
 
-    usuario = Usuario(email=body.email, senha_hash=senha_hash, papel=body.papel)
+    usuario = Usuario(email=body.email, senha_hash=senha_hash, papel=Papel.MEMBRO)
     db.add(usuario)
     db.commit()
     db.refresh(usuario)

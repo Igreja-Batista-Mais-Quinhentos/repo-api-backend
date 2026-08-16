@@ -4,7 +4,6 @@ from app.models.usuario import Papel
 class RegisterInput(BaseModel):
     email: EmailStr
     senha: str
-    papel: Papel = Papel.MEMBRO
 
 class LoginInput(BaseModel):
     email: EmailStr
