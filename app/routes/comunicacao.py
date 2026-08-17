@@ -127,8 +127,12 @@ def listar_pedidos(
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_usuario_atual),
 ):
+    from app.models.membro import Membro
+    meu_membro = db.query(Membro).filter(Membro.usuario_id == usuario.id).first()
+    meu_membro_id = meu_membro.id if meu_membro else None
+
     query = db.query(PedidoOracao).filter(
-        (PedidoOracao.privado == False) | (PedidoOracao.membro_id == usuario.id)
+        (PedidoOracao.privado == False) | (PedidoOracao.membro_id == meu_membro_id)
     )
     pedidos = query.order_by(PedidoOracao.criado_em.desc()).all()
 
@@ -147,7 +151,7 @@ def criar_pedido(
     usuario: Usuario = Depends(get_usuario_atual),
 ):
     from app.models.membro import Membro
-    membro = db.query(Membro).filter(Membro.id == usuario.id).first()
+    membro = db.query(Membro).filter(Membro.usuario_id == usuario.id).first()
     if not membro:
         raise HTTPException(status_code=400, detail="Usuário não possui perfil de membro")
 
