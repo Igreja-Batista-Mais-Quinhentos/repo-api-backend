@@ -4,6 +4,9 @@ load_dotenv()
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from app.limiter import limiter
 from app.routes import auth, membros, financeiro, comunicacao, grupos, interessados
 from app.database import engine, Base
 import app.models
@@ -15,6 +18,9 @@ app = FastAPI(
     version="1.0.0",
     description="Backend da plataforma Igreja Batista +500"
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 cors_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()]
 

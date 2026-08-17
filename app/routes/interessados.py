@@ -1,15 +1,17 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.interessado import Interessado
 from app.models.usuario import Usuario, Papel
 from app.schemas.interessado import InteressadoCreate, InteressadoResponse
 from app.middlewares.auth import requer_papel
+from app.limiter import limiter
 
 router = APIRouter(prefix="/interessados", tags=["Interessados"])
 
 @router.post("", response_model=InteressadoResponse, status_code=status.HTTP_201_CREATED)
-def registrar(body: InteressadoCreate, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def registrar(request: Request, body: InteressadoCreate, db: Session = Depends(get_db)):
     interessado = Interessado(**body.model_dump())
     db.add(interessado)
     db.commit()

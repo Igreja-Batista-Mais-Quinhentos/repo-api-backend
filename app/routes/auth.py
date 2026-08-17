@@ -1,16 +1,18 @@
 import bcrypt
 from datetime import datetime, timedelta, timezone
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.usuario import Usuario, Papel
 from app.schemas.auth import RegisterInput, LoginInput, TokenResponse, UsuarioResponse
 from app.middlewares.auth import create_token, get_usuario_atual
+from app.limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
 @router.post("/cadastrar", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
-def cadastrar(body: RegisterInput, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def cadastrar(request: Request, body: RegisterInput, db: Session = Depends(get_db)):
     if db.query(Usuario).filter(Usuario.email == body.email).first():
         raise HTTPException(status_code=400, detail="E-mail já cadastrado")
 
@@ -31,7 +33,8 @@ def cadastrar(body: RegisterInput, db: Session = Depends(get_db)):
     return {"access_token": token}
 
 @router.post("/login", response_model=TokenResponse)
-def login(body: LoginInput, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(request: Request, body: LoginInput, db: Session = Depends(get_db)):
     usuario = db.query(Usuario).filter(Usuario.email == body.email).first()
 
     if not usuario or not bcrypt.checkpw(body.senha.encode(), usuario.senha_hash.encode()):
