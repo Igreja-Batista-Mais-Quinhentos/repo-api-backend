@@ -5,7 +5,7 @@ from app.database import get_db
 from app.models.membro import Membro, StatusMembro
 from app.models.usuario import Usuario, Papel
 from app.schemas.membro import MembroCreate, MembroUpdate, MembroResponse
-from app.middlewares.auth import get_usuario_atual, requer_papel
+from app.middlewares.auth import requer_papel
 
 router = APIRouter(prefix="/membros", tags=["Membros"])
 
@@ -14,7 +14,7 @@ def listar(
     busca: Optional[str] = Query(None, description="Buscar por nome ou telefone"),
     status: Optional[StatusMembro] = Query(None),
     db: Session = Depends(get_db),
-    _: Usuario = Depends(get_usuario_atual)
+    _: Usuario = Depends(requer_papel(Papel.PASTOR, Papel.LIDER, Papel.TESOUREIRO))
 ):
     query = db.query(Membro)
 
@@ -33,7 +33,7 @@ def listar(
 def buscar(
     id: int,
     db: Session = Depends(get_db),
-    _: Usuario = Depends(get_usuario_atual)
+    _: Usuario = Depends(requer_papel(Papel.PASTOR, Papel.LIDER, Papel.TESOUREIRO))
 ):
     membro = db.query(Membro).filter(Membro.id == id).first()
     if not membro:
