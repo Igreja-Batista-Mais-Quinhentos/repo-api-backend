@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 from app.models.usuario import Papel
 
 class RegisterInput(BaseModel):
@@ -18,6 +19,7 @@ class UsuarioResponse(BaseModel):
     email: str
     papel: Papel
     ativo: bool
+    membro_id: Optional[int] = None
 
     class Config:
         from_attributes = True

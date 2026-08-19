@@ -57,4 +57,10 @@ def login(request: Request, body: LoginInput, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=UsuarioResponse)
 def me(usuario: Usuario = Depends(get_usuario_atual)):
-    return usuario
+    return UsuarioResponse(
+        id=usuario.id,
+        email=usuario.email,
+        papel=usuario.papel,
+        ativo=usuario.ativo,
+        membro_id=usuario.membro.id if usuario.membro else None,
+    )
