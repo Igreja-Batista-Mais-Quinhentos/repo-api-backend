@@ -90,30 +90,36 @@ def criar_evento(
 @router.post("/eventos/{id}/confirmar", status_code=204)
 def confirmar_presenca(
     id: int,
-    membro_id: int = Query(...),
     db: Session = Depends(get_db),
-    _: Usuario = Depends(get_usuario_atual),
+    usuario: Usuario = Depends(get_usuario_atual),
 ):
+    from app.models.membro import Membro
+    membro = db.query(Membro).filter(Membro.usuario_id == usuario.id).first()
+    if not membro:
+        raise HTTPException(status_code=400, detail="Usuário não possui perfil de membro")
     if not db.query(Evento).filter(Evento.id == id, Evento.cancelado == False).first():
         raise HTTPException(status_code=404, detail="Evento não encontrado")
     existe = db.query(EventoConfirmacao).filter(
         EventoConfirmacao.evento_id == id,
-        EventoConfirmacao.membro_id == membro_id,
+        EventoConfirmacao.membro_id == membro.id,
     ).first()
     if not existe:
-        db.add(EventoConfirmacao(evento_id=id, membro_id=membro_id))
+        db.add(EventoConfirmacao(evento_id=id, membro_id=membro.id))
         db.commit()
 
 @router.delete("/eventos/{id}/confirmar", status_code=204)
 def cancelar_confirmacao(
     id: int,
-    membro_id: int = Query(...),
     db: Session = Depends(get_db),
-    _: Usuario = Depends(get_usuario_atual),
+    usuario: Usuario = Depends(get_usuario_atual),
 ):
+    from app.models.membro import Membro
+    membro = db.query(Membro).filter(Membro.usuario_id == usuario.id).first()
+    if not membro:
+        raise HTTPException(status_code=400, detail="Usuário não possui perfil de membro")
     confirmacao = db.query(EventoConfirmacao).filter(
         EventoConfirmacao.evento_id == id,
-        EventoConfirmacao.membro_id == membro_id,
+        EventoConfirmacao.membro_id == membro.id,
     ).first()
     if confirmacao:
         db.delete(confirmacao)
@@ -166,20 +172,23 @@ def criar_pedido(
 @router.post("/pedidos-oracao/{id}/orar", status_code=204)
 def registrar_oracao(
     id: int,
-    membro_id: int = Query(...),
     db: Session = Depends(get_db),
-    _: Usuario = Depends(get_usuario_atual),
+    usuario: Usuario = Depends(get_usuario_atual),
 ):
+    from app.models.membro import Membro
+    membro = db.query(Membro).filter(Membro.usuario_id == usuario.id).first()
+    if not membro:
+        raise HTTPException(status_code=400, detail="Usuário não possui perfil de membro")
     pedido = db.query(PedidoOracao).filter(PedidoOracao.id == id).first()
     if not pedido:
         raise HTTPException(status_code=404, detail="Pedido não encontrado")
     if pedido.privado:
         raise HTTPException(status_code=403, detail="Pedido privado")
     existe = db.query(Oracao).filter(
-        Oracao.pedido_id == id, Oracao.membro_id == membro_id
+        Oracao.pedido_id == id, Oracao.membro_id == membro.id
     ).first()
     if not existe:
-        db.add(Oracao(pedido_id=id, membro_id=membro_id))
+        db.add(Oracao(pedido_id=id, membro_id=membro.id))
         db.commit()
 
 @router.patch("/pedidos-oracao/{id}/respondido", status_code=204)
