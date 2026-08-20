@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.limiter import limiter
-from app.routes import auth, membros, financeiro, comunicacao, grupos, interessados
+from app.routes import auth, membros, financeiro, comunicacao, grupos, interessados, conteudo, doacao
 from app.database import engine, Base
 import app.models
 
@@ -38,6 +38,8 @@ app.include_router(financeiro.router)
 app.include_router(comunicacao.router)
 app.include_router(grupos.router)
 app.include_router(interessados.router)
+app.include_router(conteudo.router)
+app.include_router(doacao.router)
 
 @app.get("/")
 def root():

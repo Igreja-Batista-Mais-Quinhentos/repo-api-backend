@@ -5,3 +5,5 @@ from .frequencia import Frequencia
 from .financeiro import CategoriaFinanceira, Campanha, LancamentoFinanceiro, TipoLancamento
 from .comunicacao import Aviso, Evento, EventoConfirmacao, PedidoOracao, Oracao
 from .interessado import Interessado
+from .conteudo import Ministerio, Noticia
+from .doacao import FundoDoacao, ConfiguracaoDoacao
