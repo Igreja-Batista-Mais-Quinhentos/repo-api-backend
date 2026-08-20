@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.usuario import Usuario, Papel
+from app.models.membro import Membro
 from app.schemas.auth import RegisterInput, LoginInput, TokenResponse, UsuarioResponse
 from app.middlewares.auth import create_token, get_usuario_atual
 from app.limiter import limiter
@@ -22,6 +23,14 @@ def cadastrar(request: Request, body: RegisterInput, db: Session = Depends(get_d
     db.add(usuario)
     db.commit()
     db.refresh(usuario)
+
+    membro_existente = db.query(Membro).filter(Membro.email == body.email).first()
+    if membro_existente:
+        if not membro_existente.usuario_id:
+            membro_existente.usuario_id = usuario.id
+    else:
+        db.add(Membro(nome=body.email.split("@")[0], email=body.email, usuario_id=usuario.id))
+    db.commit()
 
     token = create_token({
         "sub": str(usuario.id),
